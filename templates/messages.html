@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block container %}
+{% from main import APPLY_FRIEND, ANSWER_QUESTION, SYSTEM_MESSAGE, PROCESSED, UNPROCESSED %}
+<input type="hidden" name="user" class="user" value="{{user}}"/>
+<div class="messages-list">
+  {% for i in ret %}
+  <input type="hidden" class="message_id" value="{{ i['message_id'] }}">
+  {% if i['type'] == APPLY_FRIEND %}
+  <li><a href="/user/{{ i['from_user'] }}">{{ i['from_user'] }}</a> 申请加你为好友
+    {% if i['status'] == UNPROCESSED %}
+      <button class="btn btn-xs btn-primary agree-friend"
+              data-login="{{ i['from_user'] }}"
+              data-message_id="{{ i['message_id'] }}">同意</button></li>
+    {% elif i['status'] == PROCESSED %}
+      <button class="btn btn-xs btn-default disabled">已处理</button>
+    {% end %}
+  </li>
+
+  {% elif i['type'] == ANSWER_QUESTION %}
+  <input type="hidden" name="question_id" class="question_id" value="{{i['question_id']}}"/>
+  <li><a href="/user/{{ i['from_user'] }}">{{ i['from_user'] }}</a> 回答了你的问题 <a href="{{ i['question_url'] }}">{{ i['question_title'] }}</a></li>
+  {% end %}
+  {% end %}
+</div>
+{% end %}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $('.agree-friend').on('click', function () {
+      var $this = $(this);
+      var from_user = $this.attr('data-login');
+      var message_id = $this.attr('data-message_id');
+      var flag = 1;
+
+      $.post('/deal_friend', {
+        'from_user': from_user,
+        'message_id': message_id,
+        'flag': flag
+      }).success(function() {
+        $('.agree-friend').replaceWith('<button class="btn btn-xs btn-default disabled">已添加</button>');
+      })
+    })
+  })
+</script>
+{% end %}

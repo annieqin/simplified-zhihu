@@ -1,0 +1,56 @@
+{% extends 'base.html %}
+
+{% block container %}
+<div class="questions-list">
+{% for i in ret %}
+  <li class="question">
+    {{ i['user'] }} 提出了问题</br>
+    <a href="{{ i['question_url'] }}">{{ i['question_title'] }}</a> {{ i['created_at'] }}</br>
+    {{ i['answers_count'] }} 个回答
+  </li>
+{% end %}
+</div>
+
+<div class="ask-question">
+  我要提问：</br>
+  问题标题 <input type="text" class="question-title"></br>
+  问题描述 <input type="text" class="question-description"></br>
+  <input type="submit" name="submit" class="btn-ask-question"/>
+</div>
+{% end %}
+
+{% block javascript %}
+<!----------问题------------>
+<script id="question-list-template" type="template">
+<li class="question" role="presentation">
+  <%= user %> 提出了问题</br>
+  <a href="<%= question_url %>"><%= question_title %></a> <%= created_at %></br>
+  <%= answers_count %> 个回答
+</li>
+</script>
+
+<!----------问题与答案---------->
+<script id="question-template" type="template">
+
+</script>
+
+<script>
+  $(function () {
+    var $questionTemplate = _.template($('#question-list-template').html());
+    $('.btn-ask-question').on('click', function() {
+      var question_title = $('.question-title').val();
+      var question_description = $('.question-description').val();
+
+      $.post('/ask_question', {
+        'question_title': question_title,
+        'question_description': question_description,
+      }).success(function(data) {
+        $($questionTemplate(data)).insertBefore($('.ask-question'));
+      })
+
+
+
+    })
+  })
+</script>
+{% end %}

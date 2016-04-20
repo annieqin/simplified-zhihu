@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block container %}
+{% from main import UserRelation %}
+<input type="hidden" name="user" class="user" value="{{user}}"/>
+<input type="text" name="search-user" class="search-user"/>
+<button class="btn-search" name="btn-search">搜索</button>
+<div class="friend-list">
+{% for i in query %}
+<li>
+  {% if i.friend == user %}
+  {{ i.user}}
+  {% elif i.user == user %}
+  {{ i.friend }}
+  {% end %}
+</li>
+{% end %}
+  </div>
+{% end %}
+
+{% block javascript %}
+
+<!-----------单用户模版-------------->
+<script id="user-template" type="template">
+  <li class="user" role="presentation">
+    <a href="/user/<%= login %>" class="btn-user-check" data-id="<%= id %>" data-login="<%= login %>">
+      <%= login %>
+      <!--<span class="glyphicon glyphicon-eye-close"></span>-->
+    </a>
+    <% if (relation_status == '{{ UserRelation.NOT_ADDED }}') { %>
+    <a href="#"><button class="btn btn-xs btn-primary apply-friend"
+                        data-id="<%= id %>"
+                        data-login="<%= login %>">加为好友</button></a>
+    <% } else if (relation_status == '{{ UserRelation.ADDED }}') { %>
+    <a href="#"><button class="btn btn-xs btn-danger delete-friend"
+                        data-id="<%= id %>"
+                        data-login="<%= login %>">删除好友</button></a>
+    <% } else if (relation_status == '{{ UserRelation.APPLYING }}') { %>
+    <a href="#"><button class="btn btn-xs btn-default disabled">等待对方处理您的好友请求</button></a>
+    <% } else { %>
+    <a href="#"><button class="btn btn-xs btn-default disabled">请处理对方的好友请求</button></a>
+    <% } %>
+  </li>
+</script>
+
+
+<script>
+  $(function(){
+    var $userTemplate = _.template($('#user-template').html());
+    $('.btn-search').on('click', function() {
+      var search_user = $('.search-user').val();
+
+//      $.get('/search_user', {'user': search_user})
+      $.get('/search_user/' + search_user).success(function(data){
+//        $('.friend-list').replaceWith('<h2>'+search_user+'</h2>');
+        $('.friend-list').replaceWith($userTemplate(data));
+
+//        console.log($($userTemplate(data)));
+//        console.log($($userTemplate(data)).find('.apply-friend'));
+//        console.log($('.apply-friend'));
+
+//        var userTemplate = $($userTemplate(data));
+
+        $('.apply-friend').on('click', function() {
+          var $this = $(this);
+          var to_user = $this.attr('data-login');
+//          var from_user = $('.user').val();
+//          console.log(from_user);
+          $.post('/apply_friend', {
+            'to_user': to_user
+          }).success(function(){
+            $('.apply-friend').replaceWith('<button class="btn btn-xs btn-default disabled">等待对方处理您的好友请求</button>');
+          })
+        })
+      })
+    });
+  })
+</script>
+{% end %}

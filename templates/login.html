@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+<form action="/login" method="post">
+  {% raw xsrf_form_html() %}
+账号： <input type="text" name="login" class="login"/><br/>
+密码： <input type="text" name="pwd" class="pwd"/><br/>
+<input type="submit" value="登陆" class="btn-login"/>
+  </form>
+<a href="/register">注册账号</a>
+</body>
+</html>

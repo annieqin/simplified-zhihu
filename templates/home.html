@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block container %}
+{% from main import Message %}
+
+{% for i in query %}
+<li>
+{{ i.author }}: {{ i.content }}
+</li>
+{% end %}
+<!--<form action="/" method="post">-->
+<div class="new-message">
+  {% raw xsrf_form_html() %}
+  我要留言<br/>
+  <input type="hidden" name="user" class="user" value="{{ user }}"/>
+  内容：<input type="text" name="content" class="content"/><br/>
+  状态：<input type="radio" name="status" class="status" value="{{Message.PUBLIC}}"/>公开
+       <input type="radio" name="status" class="status" value="{{Message.PRIVATE}}"/>私密<br/>
+  <input type="submit" name="submit" class="btn-new-message"/>
+  <a href="/logout">退出登录</a>
+<!--</form>-->
+</div>
+{% end %}
+
+{% block javascript %}
+<script>
+  $(function() {
+    var $new_message = $('.new-message');
+    $('.btn-new-message').on('click', function() {
+      var author = '{{user}}';
+      var content = $new_message.find('.content').val();
+      var status = $new_message.find('.status:checked').val();
+
+      var data = {
+        'author': author,
+        'content': content,
+        'status': status
+      };
+
+      $.post('/', data).success(function() {
+        $('<li>' + author + ': ' + content + '</li>').insertBefore($('.new-message'));
+        $new_message.find('.author').val('');
+        $new_message.find('.content').val('');
+        $new_message.find('.status').val('');
+      })
+    })
+  })
+</script>
+{% end %}

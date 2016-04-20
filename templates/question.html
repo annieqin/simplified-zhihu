@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block container %}
+<input type="hidden" class="question_id" value="{{ question_id }}">
+<input type="hidden" class="question_from" value="{{ret['user']}}">
+<h1>{{ ret['title'] }}</h1>问题来自{{ ret['user'] }}<br>
+{{ ret['description'] }}<br>
+{{ ret['answers_count'] }}个回答
+{% if ret.get('answers') %}
+{% for i in ret['answers'] %}
+<li>{{i['content']}}<br>
+    来自{{i['from_user']}}<br>
+    {{i['created_at']}}</li>
+{% end %}
+{% end %}
+<input type="text" class="my-answer"/>
+<button class="answer-question">我要回答</button>
+{% end %}
+
+{% block javascript %}
+<script id="answer-template" type="template">
+<li><%= content %><br>
+    来自<%= from_user %><br>
+    <%= created_at %></li>
+</script>
+<script>
+  $(function() {
+    var answerTemplate = _.template($('#answer-template').html());
+    $('.answer-question').on('click', function() {
+      var answer = $('.my-answer').val();
+      var question_id = $('.question_id').val();
+      var question_from = $('.question_from').val();
+      $.post('/answer_question', {
+        'question_id': question_id,
+        'answer': answer,
+        'question_from': question_from
+      }).success(function(data) {
+        $(answerTemplate(data)).insertBefore($('.my-answer'));
+      })
+    })
+  })
+</script>
+{% end %}
